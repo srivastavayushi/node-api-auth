@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { registerValidation, loginValidation } = require("../validation");
 
@@ -49,7 +50,20 @@ router.post("/login", async (req, res) => {
 
   //check if user exists
   const userExists = await User.findOne({ email });
-  if (!userExists) return res.send("Email or Password is wrong");
+  if (!userExists) return res.send("Email not found");
+
+  //check if password is correct
+  const passValid = await bcrypt.compare(password, userExists.password);
+  if (!passValid) return res.status(400).send("Invalid Password");
+
+  // JWT
+  const token = await jwt.sign(
+    { _id: userExists._id },
+    process.env.TOKEN_SECRET,
+  );
+  res.header("auth-token", token).send(token);
+
+  //res.send("YOU ARE LOGGED IN SUCCESSFULLY");
 });
 
 module.exports = router;
