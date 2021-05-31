@@ -8,6 +8,9 @@ dotenv.config({ path: "./config/config.env" });
 // connect DB
 connectDB();
 
+//BodyParser Middleware
+app.use(express.json());
+
 // Import ROUTES
 const authRoute = require("./routes/auth");
 
